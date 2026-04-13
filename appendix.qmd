@@ -1,0 +1,12 @@
+---
+title: "Apppendix AI Use"
+author: "Vrunda Patil"
+format: html
+---
+
+I've used AI for rectifying errors and how to push the files from positron to github repository. I've attached screenshots of the same.
+
+
+Screenshots:
+SS_1_AI.png
+SS_2_AI.png
