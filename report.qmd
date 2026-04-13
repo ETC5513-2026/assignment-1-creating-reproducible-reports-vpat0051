@@ -1,0 +1,120 @@
+---
+title: "Assignment 1 (Report)"
+author: "Vrunda Patil"
+format:
+  html:
+    theme: flatly
+    toc: true
+  pdf:
+    toc: true
+---
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(lubridate)
+library(quarto)
+```
+
+
+## Introduction
+Understanding whether spending more on marketing actually leads to more customer purchases is important for any retailer. Last quarter, the marketing team ran a personalised campaign where different amounts were spent on each customer through ads, emails and coupons. This created useful variation that can be analysed. By looking at this data, we can see if higher marketing spend is linked to higher customer spending, which will help guide future budget decisions.
+
+---
+
+## Research Question
+
+This report looks at whether customers who receive more marketing spend also end up making bigger purchases during the campaign. In simple terms, it checks if spending more on a customer leads to them spending more with the retailer. It also explores whether this relationship is different across the three customer groups: Consumer, SMB and Enterprise.
+
+---
+
+## Dataset Introduction
+
+The dataset used in this report contains information about customers, their marketing spend and their purchase behaviour. It includes details such as how much was spent on marketing for each customer, how much they purchased, their segment and when they signed up. Before analysing the data, it was cleaned by fixing the date format and removing any rows with missing purchase amounts. This helps ensure the analysis is accurate and reliable.
+
+---
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+df <- read_csv("data/36906131_VrundaPatil.csv")
+
+# Standardise date format, drop rows missing purchase_amount
+df_clean <- df |>
+  mutate(signup_date = parse_date_time(signup_date,
+           orders = c("ymd", "dmy", "mdy", "b d, Y"))) |>
+  filter(!is.na(purchase_amount))
+```
+
+### Dataset Description
+Dataset showa how much money was spent on marketing for each customer and how much they spend on purchases. The summary statistics give the average, lowest and highest values for marketing spend and purchase amount, helping us understand the overall data. We can see that marketing spend is different for each customer.The dataset also divides customers into three groups such as Consumer, SMB and Enterprise. A bar chart shows how many custommers are in each group. This helps us see which group has more customers and understand if marketing works differently for each type of customer.
+
+
+```{r}
+#| echo: false
+#| label: tbl-summary
+#| tbl-cap: "Summary statistics for marketing spend and purchase amount"
+
+df_clean |>
+  summarise(
+    `Mean Spend($)`    = round(mean(marketing_spend), 2),
+    `Mean Purchase $)` = round(mean(purchase_amount), 2),
+    `Min Spend($)`     = round(min(marketing_spend), 2),
+    `Max Spend($)`     = round(max(marketing_spend), 2)
+  ) |>
+  kable()
+    
+```
+
+```{r}
+#| echo: false
+#| label: fig-segments
+#| fig-cap: "Number of customers by segment"
+
+df_clean |>
+  count(segment) |>
+  ggplot(aes(x = segment, y = n, fill = segment)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = "Segment", y = "Count") +
+  theme_minimal()
+```
+
+## Results
+The results show a positive relationship between marketing spend and purchase amount. This means that when more money is spent on marketing, customers usually spend more on purchases. The scatter plot shows this trend clearly and the line on the graph also supports this pattern. When we look at different customer groups, the relationship is still positive for all of them. However, the effect is a bit stronger for some groups than others. Overall, the results suggest that spending more on marketing can lead to higher customer spending.
+
+
+```{r}
+#| echo: false
+#| label: fig-scatter
+#| fig-cap: "Relationship between marketing spend and purchase amount"
+#| results: hide
+#| warning: false
+
+ggplot(df_clean, aes(x = marketing_spend, y = purchase_amount)) +
+  geom_point(alpha = 0.5, colour = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE, colour = "firebrick") +
+  labs(x = "Marketing Spend ($)", y = "Purchase Amount ($)") +
+  theme_minimal()
+```
+
+```{r}
+#| echo: false
+#| label: fig-segment-scatter
+#| fig-cap: "Marketing spend vs purchase amount by customer segment"
+#| results: hide
+
+ggplot(df_clean, aes(x = marketing_spend, y = purchase_amount, colour = segment)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Marketing Spend ($)", y = "Purchase Amount ($)", colour = "Segment") +
+  theme_minimal()
+```
